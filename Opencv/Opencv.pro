@@ -5,6 +5,7 @@ CONFIG -= qt
 
 SOURCES += main.cpp
 
+
 INCLUDEPATH += C:\opencv\opencv\build\include
 
 
