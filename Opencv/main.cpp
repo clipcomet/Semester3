@@ -75,17 +75,17 @@ Mat imgHSV;
 
 
 
-  cvtColor(imgOriginal, imgHSV, COLOR_BGR2HSV); //Convert the captured frame from BGR to HSV
+  cvtColor(imgOriginal, imgHSV, COLOR_BGR2HSV); //Convert the captured frame from RGB to HSV
 
 
 
    inRange(imgHSV, Scalar(iLowH, iLowS, iLowV), Scalar(iHighH, iHighS, iHighV), imgThresholded); //Threshold the image
 
-  //morphological opening (remove small objects from the foreground)
+  //(remove small objects from the foreground "or trying to :P)
   erode(imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
   dilate( imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
 
-   //morphological closing (fill small holes in the foreground)
+   //(fill small holes in the foreground again trying to :P)
   dilate( imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
   erode(imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
 
