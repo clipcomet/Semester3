@@ -1,1 +1,4 @@
-modern_driver
+roslauncg ur_modern_driver ur5_bringup.launch robot_ip:= 127.0.0.1
+rosrun modern_driver test_move.py
+
+. start-ursim.sh
