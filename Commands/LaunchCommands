@@ -1,12 +1,13 @@
 
 
 ////////////////URcontrol//////////////////////////////////
-roslauncg ur_modern_driver ur5_bringup.launch robot_ip:= 127.0.0.1
+roslaunch ur_modern_driver ur5_bringup.launch robot_ip:= 127.0.0.1
 rosrun modern_driver test_move.py
 //////////////////////////////////////////////
 
 /////////////////Pylon(camara)/////////////////////////
 roslaunch pylon_camera pylon_camera_node.launch
+rosrun pylon_camera pylon_camera_node.launch
 
 //////////////////////////////////////////////////////////
 
