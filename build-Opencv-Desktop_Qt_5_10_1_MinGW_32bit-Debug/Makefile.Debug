@@ -99,7 +99,8 @@ compiler_clean:
 
 ####### Compile
 
-debug/main.o: ../Opencv/main.cpp C:/opencv/opencv/build/include/opencv2/core/core.hpp \
+debug/main.o: ../Opencv/main.cpp ../Opencv/opencv.h \
+		C:/opencv/opencv/build/include/opencv2/core/core.hpp \
 		C:/opencv/opencv/build/include/opencv2/core.hpp \
 		C:/opencv/opencv/build/include/opencv2/core/cvdef.h \
 		C:/opencv/opencv/build/include/opencv2/core/hal/interface.h \
