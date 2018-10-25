@@ -5,24 +5,40 @@
 #include "opencv2/imgproc/imgproc.hpp"
 #include <opencv2/highgui/highgui.hpp>
 #include "opencv2/opencv.hpp"
-#include "opencv.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 using namespace cv;
 using namespace std;
 
+std::string Opencv::IntToString ( int number )
+{
+  std::ostringstream oss;
+
+  // Works just like cout
+  oss<< number;
+
+  // Return the underlying string
+  return oss.str();
+}
+
 Opencv::Opencv()
 {
 
+  iLowH = 0;
+  iHighH = 179;
+
+  iLowS = 0;
+  iHighS = 255;
+
+  iLowV = 0;
+  iHighV = 84;
 }
 
 
 
 Mat Opencv::capturevidio(VideoCapture cap)
 {
-
-
         Mat imgOriginal;
         bool bSuccess = cap.read(imgOriginal); // read a new frame from video
 
@@ -99,8 +115,8 @@ Mat Opencv::printcenter (Mat imgOriginal,Point center) // adds circle to center
 Mat Opencv::printtextcenter (Mat imgOriginal,Point center) // adds text to center
 {
 
-    string x = to_string(center.x);
-    string y = to_string(center.y);
+    string x = this->IntToString(center.x);
+    string y = this->IntToString(center.y);
     string text = "x= " + x + " y= "+ y;
     putText(imgOriginal,text,center,1,1,Scalar(255,0,0),2);
     return imgOriginal;
@@ -169,8 +185,11 @@ Point Opencv::allInOne (Mat imgOriginal)
 
  Canny( imgThresholded, edge, 0, 150, kernel_size);
 imgOriginal.copyTo( draw, edge);
- imshow("edge", edge);
- imshow("draw", draw);
+if(devMode == 1)
+    {
+    imshow("edge", edge);
+    }
+//imshow("draw", draw);
 ////////////////////////////////////////////////
 
 
@@ -189,8 +208,8 @@ imgOriginal.copyTo( draw, edge);
 
  //-----------print cords--------------
 
- string x = to_string(center.x);
- string y = to_string(center.y);
+ string x = this->IntToString(center.x);
+ string y = this->IntToString(center.y);
  string text = "x= " + x + " y= "+ y;
  putText(imgOriginal,text,center,1,1,Scalar(255,0,0),2);
 
@@ -199,9 +218,12 @@ imgOriginal.copyTo( draw, edge);
 
 
  //-------------------------show------------------------
- imshow("Thresholded Image", imgThresholded); //show the thresholded image
-//  blur( imgThresholded,imgThresholded,Size( 3, 3 ));                                        // blur
- imshow("smoothed Image", imgThresholded); //show the thresholded image
+ if(devMode == 1)
+     {
+     imshow("Thresholded Image", imgThresholded); //show the thresholded image
+     //blur( imgThresholded,imgThresholded,Size( 3, 3 ));                                        // blur
+     imshow("smoothed Image", imgThresholded); //show the thresholded image
+     }
  imshow("Original", imgOriginal); //show the original image
 
 

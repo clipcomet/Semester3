@@ -15,6 +15,7 @@ class Opencv
 public:
     Opencv();
 
+    std::string IntToString(int number);
     cv::Mat capturevidio(cv::VideoCapture);
     cv::Mat convertRGBHSV(cv::Mat);
     cv::Mat Thresholded(cv::Mat);
@@ -30,14 +31,15 @@ public:
 
 private:
 
-    int iLowH = 0;
-    int iHighH = 179;
+    int iLowH ;
+    int iHighH;
 
-    int iLowS = 0;
-    int iHighS = 255;
+    int iLowS;
+    int iHighS;
 
-    int iLowV = 0;
-    int iHighV = 84;
+    int iLowV;
+    int iHighV;
+    int devMode = 0;
 
 
 };
