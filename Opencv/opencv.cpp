@@ -11,31 +11,22 @@
 using namespace cv;
 using namespace std;
 
-std::string Opencv::IntToString ( int number )
-{
-  std::ostringstream oss;
-
-  // Works just like cout
-  oss<< number;
-
-  // Return the underlying string
-  return oss.str();
-}
-
 Opencv::Opencv()
 {
+    iLowH = 0;
+    iHighH = 179;
 
-  iLowH = 0;
-  iHighH = 179;
+    iLowS = 42;
+    iHighS = 255;
 
-  iLowS = 0;
-  iHighS = 255;
+    iLowV = 0;
+    iHighV = 255;
 
-  iLowV = 0;
-  iHighV = 84;
+    lowThreshold = 0;
+    max_lowThreshold = 100;
+    scale = 39;
+
 }
-
-
 
 Mat Opencv::capturevidio(VideoCapture cap)
 {
@@ -52,217 +43,6 @@ Mat Opencv::capturevidio(VideoCapture cap)
 
 }
 
-Mat Opencv::convertRGBHSV(Mat imgOriginal) // outputs imgHSV
-{
-    Mat imgHSV;
-    cvtColor(imgOriginal, imgHSV, COLOR_BGR2HSV); //Convert the captured frame from RGB to HSV
-    return imgHSV;
-
-}
-
-Mat Opencv::Thresholded(Mat imgHSV) // sliders and return a Threshold img
-{
-    Mat imgThresholded;
-
-    namedWindow("Control", CV_WINDOW_AUTOSIZE); //create a window called "Control"
-
-    //Create trackbars in "Control" window
-    cvCreateTrackbar("LowH", "Control", &iLowH, 179); //Hue (0 - 179)
-    cvCreateTrackbar("HighH", "Control", &iHighH, 179);
-
-    cvCreateTrackbar("LowS", "Control", &iLowS, 255); //Saturation (0 - 255)
-    cvCreateTrackbar("HighS", "Control", &iHighS, 255);
-
-    cvCreateTrackbar("LowV", "Control", &iLowV, 255); //Value (0 - 255)
-    cvCreateTrackbar("HighV", "Control", &iHighV, 255);
-
-    inRange(imgHSV, Scalar(iLowH, iLowS, iLowV), Scalar(iHighH, iHighS, iHighV), imgThresholded); //Threshold the image
-
-    return imgThresholded;
-
-}
-
-Mat Opencv::erodedilate(Mat imgThresholded) // tryes to make picture easter to handle
-{
-    Mat cimgThresholded;
-    //(remove small objects from the foreground "or trying to :P)
-    erode(imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
-    dilate( imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
-
-     //(fill small holes in the foreground again trying to :P)
-    dilate( imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
-    erode(imgThresholded, cimgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
-    return cimgThresholded;
-}
-
-Point Opencv::findCenter(Mat imgThresholded) //find Center of Threshold img
-{
-    Moments mu = moments(imgThresholded, true);
-    Point center;
-    center.x = mu.m10 / mu.m00;
-    center.y = mu.m01 / mu.m00;
-}
-
-Mat Opencv::printcenter (Mat imgOriginal,Point center) // adds circle to center
-{
-    Mat temp = imgOriginal;
-    circle(temp, center, 4, Scalar(255,0,255));
-    cout << center.x << " " << center.y << " " << endl;
-   return temp;
-
-}
-
-Mat Opencv::printtextcenter (Mat imgOriginal,Point center) // adds text to center
-{
-
-    string x = this->IntToString(center.x);
-    string y = this->IntToString(center.y);
-    string text = "x= " + x + " y= "+ y;
-    putText(imgOriginal,text,center,1,1,Scalar(255,0,0),2);
-    return imgOriginal;
-}
-
-Mat Opencv::vectoroutline (Mat imgThresholded,Mat org) // draws a vector line around objects
-{
-    Mat temp = org.clone();
-    vector<vector<Point> > contours; // vektor points for outline of object
-   findContours(imgThresholded,contours, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0, 0)); //make points from
-   drawContours(temp,contours,-1,(255,255,0),3); //send points too
-   return temp;
-}
-
-void Opencv::imShow (Mat img,string name) // img to show and name of Window its showen in
-{
-    //namedWindow(name);
-    //moveWindow(name, 20,20);
-    imshow(name, img);
-
-}
-
-Point Opencv::allInOne (Mat imgOriginal)
-{
-   vector<vector<Point> > contours; // vektor points for outline of object
-   vector<vector<Point> >canny;
-
-   //----------------------------
-   int kernel_size = 3;
-
-   int countup = 0;
-   int countloop = 10; //used to slow down updates on less imported things (loops)
-
-   Mat imgThresholded;
-   Mat imgHSV;
-
-
-
-
- cvtColor(imgOriginal, imgHSV, COLOR_BGR2HSV); //Convert the captured frame from RGB to HSV
-
-
-
-  inRange(imgHSV, Scalar(iLowH, iLowS, iLowV), Scalar(iHighH, iHighS, iHighV), imgThresholded); //Threshold the image
-
- //(remove small objects from the foreground "or trying to :P)
- erode(imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
- dilate( imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
-
-  //(fill small holes in the foreground again trying to :P)
- dilate( imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
- erode(imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
-
-
-
-//------------ Vetor outline-------------------------
- findContours(imgThresholded,contours, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0, 0));
- drawContours(imgOriginal,contours,-1,(255,255,0),3);
-
-
-
-
- //----------Test draw eage-----------------------
- Mat edge, draw;
- //cvtColor(img, gray, CV_BGR2GRAY);
-
- Canny( imgThresholded, edge, 0, 150, kernel_size);
-imgOriginal.copyTo( draw, edge);
-if(devMode == 1)
-    {
-    imshow("edge", edge);
-    }
-//imshow("draw", draw);
-////////////////////////////////////////////////
-
-
-//-------------find center--------------------
-
- Moments mu = moments(imgThresholded, true);
- Point center;
- center.x = mu.m10 / mu.m00;
- center.y = mu.m01 / mu.m00;
- circle(imgOriginal, center, 4, Scalar(255,0,255));
-
-
-
-
-/////////////////////////////////////////////
-
- //-----------print cords--------------
-
- string x = this->IntToString(center.x);
- string y = this->IntToString(center.y);
- string text = "x= " + x + " y= "+ y;
- putText(imgOriginal,text,center,1,1,Scalar(255,0,0),2);
-
- ///////////////////////////////////////////////
-
-
-
- //-------------------------show------------------------
- if(devMode == 1)
-     {
-     imshow("Thresholded Image", imgThresholded); //show the thresholded image
-     //blur( imgThresholded,imgThresholded,Size( 3, 3 ));                                        // blur
-     imshow("smoothed Image", imgThresholded); //show the thresholded image
-     }
- imshow("Original", imgOriginal); //show the original image
-
-
-
-  //------------- less freqent update---------
-   if (countup <= countloop)
-   {
-     cout << center.x << " " << center.y << " " << endl;
-     countup = 0;
-   }
-   else
-   {
-       countup++;
-   }
-   ////////////////////////////////////////////////
-
-return center;
-
-}
-
-void Opencv::trackBar ()
-{
-
-
-    namedWindow("Control", CV_WINDOW_AUTOSIZE); //create a window called "Control"
-
-
-
-  //Create trackbars in "Control" window
- cvCreateTrackbar("LowH", "Control", &iLowH, 179); //Hue (0 - 179)
- cvCreateTrackbar("HighH", "Control", &iHighH, 179);
-
-  cvCreateTrackbar("LowS", "Control", &iLowS, 255); //Saturation (0 - 255)
- cvCreateTrackbar("HighS", "Control", &iHighS, 255);
-
-  cvCreateTrackbar("LowV", "Control", &iLowV, 255); //Value (0 - 255)
- cvCreateTrackbar("HighV", "Control", &iHighV, 255);
-}
-
 VideoCapture Opencv::openVideo (int device)
 {
     VideoCapture cap(device); //capture the video from web cam
@@ -276,3 +56,291 @@ VideoCapture Opencv::openVideo (int device)
         return cap;
 }
 
+void Opencv::trackBar ()
+{
+    int i = rand() % 100;
+    std::string x = std::to_string(i);
+    const char* Control = x.c_str();
+    namedWindow(Control, CV_WINDOW_AUTOSIZE); //create a window called "Control"
+
+
+
+    //Create trackbars in "Control" window
+    cvCreateTrackbar("LowH", Control, &iLowH, 179); //Hue (0 - 179)
+    cvCreateTrackbar("HighH", Control, &iHighH, 179);
+
+    cvCreateTrackbar("LowS", Control, &iLowS, 255); //Saturation (0 - 255)
+    cvCreateTrackbar("HighS", Control, &iHighS, 255);
+
+    cvCreateTrackbar("LowV", Control, &iLowV, 255); //Value (0 - 255)
+    cvCreateTrackbar("HighV", Control, &iHighV, 255);
+    cvCreateTrackbar( "Min Threshold:", Control, &lowThreshold, 100);
+    cvCreateTrackbar("scale", Control, &scale, 179);
+}
+
+void Opencv::imShow () // img to show and name of Window its showen in
+{
+
+    for (int i = 0; i < Matvector.size(); i++)
+    {
+        string x = Matvectorname[i];
+        namedWindow(x);
+        resizeWindow(x, 400,400);
+        imshow(x,Matvector[i]);
+
+    }
+    Matvector.clear();
+    Matvectorname.clear();
+}
+
+Mat Opencv::convertRGBHSV(Mat imgOriginal) // outputs imgHSV
+{
+    Mat imgHSV;
+    cvtColor(imgOriginal, imgHSV, COLOR_BGR2HSV); //Convert the captured frame from RGB to HSV
+    if (devMode == 2)
+    {
+        Matvector.push_back (imgHSV);
+        Matvectorname.push_back("HVS");
+    }
+    return imgHSV;
+
+}
+
+Mat Opencv::Thresholded(Mat imgHSV) // sliders and return a Threshold img
+{
+    Mat imgThresholded;
+
+    inRange(imgHSV, Scalar(iLowH, iLowS, iLowV), Scalar(iHighH, iHighS, iHighV), imgThresholded); //Threshold the image
+    if (devMode == 2 or devMode == 1)
+    {
+        Matvector.push_back (imgThresholded);
+        Matvectorname.push_back("Threshold");
+    }
+    return imgThresholded;
+
+}
+
+Mat Opencv::Blur(Mat ThrashImg,int x)
+{
+    Mat BlurImg;
+    blur(ThrashImg,BlurImg,Size(x,x));
+    if (devMode == 2)
+    {
+        Matvector.push_back (BlurImg);
+        Matvectorname.push_back("BlurImg");
+    }
+    return BlurImg;
+}
+
+Mat Opencv::ImgCanny(Mat BlurImg,Mat org)
+{
+    Mat dst,detected_edges;
+    /// Canny detector
+    Canny( BlurImg, detected_edges,0,100,3);
+    if (devMode == 2 or devMode == 1 )
+    {
+        Matvector.push_back (detected_edges);
+        Matvectorname.push_back("Edges");
+    }
+
+    return detected_edges;
+}
+
+Point Opencv::findCenter(Mat imgThresholded) //find Center of Threshold img
+{
+    Moments mu = moments(imgThresholded, true);
+    Point center;
+    center.x = mu.m10 / mu.m00;
+    center.y = mu.m01 / mu.m00;
+
+    return center;
+}
+
+Mat Opencv::printcenter (Mat imgOriginal,Point center) // adds circle to center
+{
+    Mat temp = imgOriginal.clone();
+    circle(temp, center, 10, Scalar(255,0,255));
+    cout << center.x << " " << center.y << " " << endl;
+
+    std::string x = std::to_string(center.x);
+    std::string y = std::to_string(center.y);
+    //string x = this->IntToString(center.x);
+    //string y = this->IntToString(center.y);
+    string text = "x= " + x + " y= "+ y;
+    putText(temp,text,center,1,1,Scalar(255,0,0),2);
+    if (devMode == 2 or devMode == 1)
+    {
+        Matvector.push_back (temp);
+        Matvectorname.push_back("Print Center");
+    }
+    return temp;
+
+
+}
+
+void Opencv::allColour(Mat &OrgImg)
+{
+
+    Opencv o;
+    //Mat OrgImg = o.capturevidio(cap);
+
+    Mat HvsImg = Opencv::convertRGBHSV(OrgImg);
+
+    Mat ThrashImg = Opencv::Thresholded(HvsImg);
+
+    Mat BlurImg = Opencv::Blur(ThrashImg,5);
+
+    Mat CanImg = Opencv::ImgCanny(BlurImg,OrgImg);
+
+    Point center = Opencv::findCenter(ThrashImg);
+
+    Mat final = Opencv::printcenter(OrgImg,center);
+
+    Mat imgErode = Opencv::erodeImg(ThrashImg);
+
+    Mat imgDilate = Opencv::dilateImg(ThrashImg);
+
+    o.imShow();
+
+}
+
+void Opencv::allSubtrack(Mat &OrgImg)
+{
+    Mat SubedImg,GrayImg,mask,FinalImg;
+    Opencv o;
+    if(First == true)
+    {
+        string temp;
+        cout << "Ready for Static pic" << endl;
+        cin >> temp;
+        StaticImg = OrgImg;
+        First = false;
+    }
+    else
+    {
+
+        absdiff(OrgImg,StaticImg, SubedImg); //subtrack one img from another
+        cvtColor(SubedImg, GrayImg, CV_BGR2GRAY); //Grayscale the picture
+
+        mask = GrayImg>scale; // create a mask that includes all pixel that changed their value
+
+        OrgImg.copyTo(FinalImg,mask); // adds the mask to the streamed img and creates a new one
+        Point x = Opencv::findCenter(mask);
+        Mat Best = Opencv::printcenter(OrgImg,x);
+
+        if (devMode == 2)
+        {
+            Matvector.push_back (OrgImg);
+            Matvector.push_back (mask);
+            Matvector.push_back (FinalImg);
+            Matvectorname.push_back("OrgImg");
+            Matvectorname.push_back("Mask");
+            Matvectorname.push_back("FinalImg");
+
+        }
+
+    }
+}
+
+void Opencv::Both (Mat &OrgImg)
+{
+   Mat OrgImg2 = OrgImg.clone();
+
+
+   Mat SubedImg,GrayImg,mask,FinalImg;
+
+   if(First == true)
+   {
+       string temp;
+       cout << "Ready for Static pic" << endl <<  "Insert Dev mode level" << endl << "----------------------" << endl << "0. NonDev" << endl << "1. Simple output" << endl << "2. All output" << endl << "----------------------" << endl << "Devmode? ";
+       cin >> devMode;
+       StaticImg = OrgImg2;
+       First = false;
+   }
+   else
+   {
+
+       absdiff(OrgImg2,StaticImg, SubedImg); //subtrack one img from another
+       cvtColor(SubedImg, GrayImg, CV_BGR2GRAY); //Grayscale the picture
+
+       mask = GrayImg>scale; // create a mask that includes all pixel that changed their value more then "scale"
+
+       OrgImg2.copyTo(FinalImg,mask); // adds the mask to the streamed img and creates a new one
+       Point subCenter = Opencv::findCenter(mask);
+
+       FinalImg = OrgImg2.clone(); // clone the orgImg for the center placement
+       Opencv::printcenter(FinalImg,subCenter);
+
+       if (devMode == 2)
+       {
+           Matvector.push_back (StaticImg);
+           Matvector.push_back (OrgImg2);
+           Matvector.push_back (mask);
+           Matvector.push_back (FinalImg);
+           Matvectorname.push_back("StaticImg");
+           Matvectorname.push_back("OrgImg2");
+           Matvectorname.push_back("Mask");
+           Matvectorname.push_back("FinalImg");
+
+       }
+
+       if (devMode == 1)
+       {
+           Matvector.push_back (StaticImg);
+           Matvector.push_back (FinalImg);
+           Matvector.push_back (mask);
+           Matvectorname.push_back("StaticImg");
+           Matvectorname.push_back("FinalImg");
+           Matvectorname.push_back("Mask");
+       }
+
+
+
+    Mat HvsImg = Opencv::convertRGBHSV(OrgImg);
+
+    Mat ThrashImg = Opencv::Thresholded(HvsImg);
+
+    Mat BlurImg = Opencv::Blur(ThrashImg,5);
+
+    Mat CanImg = Opencv::ImgCanny(BlurImg,OrgImg);
+
+    center = Opencv::findCenter(ThrashImg);
+
+    Mat final = Opencv::printcenter(OrgImg,center);
+
+    Mat imgErode = Opencv::erodeImg(ThrashImg);
+
+    Mat imgDilate = Opencv::dilateImg(ThrashImg);
+
+
+
+    }
+}
+Mat Opencv::erodeImg(Mat ThrashImg)
+{
+    Mat imgErode;
+    erode(ThrashImg, imgErode, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
+    if (devMode == 2)
+    {
+        Matvector.push_back (imgErode);
+        Matvectorname.push_back("Erode");
+    }
+    return imgErode;
+}
+
+Mat Opencv::dilateImg(Mat ThrashImg)
+{
+    Mat imgDilate;
+    erode(ThrashImg, imgDilate, getStructuringElement(MORPH_ELLIPSE, Size(7, 7)) );
+    if (devMode == 2)
+    {
+        Matvector.push_back (imgDilate);
+        Matvectorname.push_back("Dilate");
+    }
+    return imgDilate;
+}
+
+void Opencv::SetFinal(bool Fin)
+{
+    First = Fin;
+}
