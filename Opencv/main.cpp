@@ -1,4 +1,3 @@
-
 #include "opencv.h"
 #include <iostream>
 
@@ -13,58 +12,27 @@
 using namespace std;
 using namespace cv;
 
+int main()
+{
+    Opencv c;
+    c.trackBar(); // add the trackbar
+    VideoCapture cap = c.openVideo(0); // open video for cature
+    while(true)
+    {
+        Mat OrgImg = c.capturevidio(cap); // create Mat from frame of carmara
 
+        c.Both(OrgImg);  // run both ways og tracking
+        //c.allColour(OrgImg); // run tracking based on HVS
+        //c.allSubtrack(OrgImg); // run tracking base of Subtrackting background
+        c.imShow(); // show in console
 
+        if (waitKey(30) == 27) //wait for 'esc' key press for 30ms. If 'esc' key is pressed, break loop
+       {
+            cout << "esc key is pressed by user" << endl;
+            break;
+       }
 
+    }
 
- int main( int argc, char** argv )
- {
-    Opencv o;
-
-    VideoCapture cap = o.openVideo(0);
-    o.trackBar();
-
-
-    while (true)
-        {
-
-            Mat orgimg = o.capturevidio(cap);
-            /*
-            Mat HVSimg = o.convertRGBHSV(orgimg);
-
-            Mat thrashold = o.Thresholded(HVSimg);
-
-            Mat cleanThrashold = o.erodedilate(thrashold);
-
-            Mat vectorrr = o.vectoroutline(cleanThrashold,orgimg);
-
-
-
-            o.imShow(orgimg,"ORG");
-            o.imShow(HVSimg,"hvsing");
-            o.imShow(thrashold,"thrashhold");
-            o.imShow(cleanThrashold,"cleanThrashold");
-            o.imShow(vectorrr,"vectorr");
-            o.imShow(centerimg,"centerimg");
-            */
-
-            Point ur5 = o.allInOne(orgimg);
-
-
-
-
-
-            if (waitKey(30) == 27) //wait for 'esc' key press for 30ms. If 'esc' key is pressed, break loop
-           {
-                cout << "esc key is pressed by user" << endl;
-                break;
-           }
-        }
-
-
-
-
-   return 0;
-
-     }
-
+    return 0;
+}
