@@ -25,7 +25,7 @@ public:
     cv::Mat ImgCanny(cv::Mat BlurImg,cv::Mat Org);
     cv::Mat Can2Img(cv::Mat org, cv::Mat Can);
     cv::Point findCenter(cv::Mat imgThresholded);
-    cv::Mat printcenter(cv::Mat imgOriginal, cv::Point center);
+    cv::Mat printcenter(cv::Mat imgOriginal, cv::Point center,const char*);
     void allColour(cv::Mat &imgOrg);
     cv::Mat erodeImg(cv::Mat ThrashImg);
     cv::Mat dilateImg(cv::Mat ThrashImg);
@@ -48,6 +48,7 @@ private:
     int max_lowThreshold = 100;
     int scale;
     bool First = true;
+    bool ones = true;
     cv::Mat StaticImg;
     int devMode= 2; // 0 == off 1 == Only final pic 2 == all windows
 
