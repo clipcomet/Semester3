@@ -156,7 +156,7 @@ Point Opencv::findCenter(Mat imgThresholded) //find Center of Threshold img
     return center;
 }
 
-Mat Opencv::printcenter (Mat imgOriginal,Point center) // adds circle to center
+Mat Opencv::printcenter (Mat imgOriginal,Point center,const char* name) // adds circle to center
 {
     Mat temp = imgOriginal.clone();
     circle(temp, center, 10, Scalar(255,0,255));
@@ -171,7 +171,7 @@ Mat Opencv::printcenter (Mat imgOriginal,Point center) // adds circle to center
     if (devMode == 2 or devMode == 1)
     {
         Matvector.push_back (temp);
-        Matvectorname.push_back("Print Center");
+        Matvectorname.push_back(name);
     }
     return temp;
 
@@ -194,7 +194,7 @@ void Opencv::allColour(Mat &OrgImg)
 
     Point center = Opencv::findCenter(ThrashImg);
 
-    Mat final = Opencv::printcenter(OrgImg,center);
+    Mat final = Opencv::printcenter(OrgImg,center,"Point colour");
 
     Mat imgErode = Opencv::erodeImg(ThrashImg);
 
@@ -204,39 +204,53 @@ void Opencv::allColour(Mat &OrgImg)
 
 }
 
-void Opencv::allSubtrack(Mat &OrgImg)
+void Opencv::allSubtrack(Mat &OrgImg2)
 {
     Mat SubedImg,GrayImg,mask,FinalImg;
-    Opencv o;
+
     if(First == true)
     {
         string temp;
-        cout << "Ready for Static pic" << endl;
-        cin >> temp;
-        StaticImg = OrgImg;
+        cout << "Ready for Static pic" << endl <<  "Insert Dev mode level" << endl << "----------------------" << endl << "0. NonDev" << endl << "1. Simple output" << endl << "2. All output" << endl << "----------------------" << endl << "Devmode? ";
+        cin >> devMode;
+        StaticImg = OrgImg2;
         First = false;
     }
     else
     {
 
-        absdiff(OrgImg,StaticImg, SubedImg); //subtrack one img from another
+        absdiff(OrgImg2,StaticImg, SubedImg); //subtrack one img from another
         cvtColor(SubedImg, GrayImg, CV_BGR2GRAY); //Grayscale the picture
 
-        mask = GrayImg>scale; // create a mask that includes all pixel that changed their value
+        mask = GrayImg>scale; // create a mask that includes all pixel that changed their value more then "scale"
 
-        OrgImg.copyTo(FinalImg,mask); // adds the mask to the streamed img and creates a new one
-        Point x = Opencv::findCenter(mask);
-        Mat Best = Opencv::printcenter(OrgImg,x);
+        OrgImg2.copyTo(FinalImg,mask); // adds the mask to the streamed img and creates a new one
+        Point subCenter = Opencv::findCenter(mask);
+
+        FinalImg = OrgImg2.clone(); // clone the orgImg for the center placement
+        Opencv::printcenter(FinalImg,subCenter,"Point Sub ");
 
         if (devMode == 2)
         {
-            Matvector.push_back (OrgImg);
+            Matvector.push_back (StaticImg);
+            Matvector.push_back (OrgImg2);
             Matvector.push_back (mask);
             Matvector.push_back (FinalImg);
-            Matvectorname.push_back("OrgImg");
+            Matvectorname.push_back("StaticImg");
+            Matvectorname.push_back("OrgImg2");
             Matvectorname.push_back("Mask");
             Matvectorname.push_back("FinalImg");
 
+        }
+
+        if (devMode == 1)
+        {
+            Matvector.push_back (StaticImg);
+            Matvector.push_back (FinalImg);
+            Matvector.push_back (mask);
+            Matvectorname.push_back("StaticImg");
+            Matvectorname.push_back("FinalImg");
+            Matvectorname.push_back("Mask");
         }
 
     }
@@ -269,7 +283,7 @@ void Opencv::Both (Mat &OrgImg)
        Point subCenter = Opencv::findCenter(mask);
 
        FinalImg = OrgImg2.clone(); // clone the orgImg for the center placement
-       Opencv::printcenter(FinalImg,subCenter);
+       Opencv::printcenter(FinalImg,subCenter,"Point sub");
 
        if (devMode == 2)
        {
@@ -306,7 +320,7 @@ void Opencv::Both (Mat &OrgImg)
 
     center = Opencv::findCenter(ThrashImg);
 
-    Mat final = Opencv::printcenter(OrgImg,center);
+    Mat final = Opencv::printcenter(OrgImg,center,"Point colour");
 
     Mat imgErode = Opencv::erodeImg(ThrashImg);
 
